@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: griffin
+      POSTGRES_PASSWORD: griffin
+      POSTGRES_DB: llm
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_llm:/var/lib/postgresql/data
+
+volumes:
+  postgres_data_llm:
