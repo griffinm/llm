@@ -7,9 +7,7 @@ import { NewChatDto } from './dto/new-chat.dto';
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
 
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   public async findMany(): Promise<Chat[]> {
     this.logger.debug('findMany');
@@ -17,9 +15,8 @@ export class ChatService {
   }
 
   public async createChat(chat: NewChatDto): Promise<Chat> {
-    return this.prisma.chat.create({ 
-      data: chat
-      
+    return this.prisma.chat.create({
+      data: chat,
     });
   }
 }

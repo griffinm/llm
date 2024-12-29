@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Chat, Message } from './types'
 
 export const baseClient = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'http://localhost:3001',
 })
 
 export const getChats = async (): Promise<Chat[]> => {
@@ -24,9 +24,26 @@ export const getMessagesForChat = async (chatId: string): Promise<Message[]> => 
   return response.data
 }
 
-export const sendMessage = async (chatId: string, message: string): Promise<Message> => {
+export const sendMessage = async ({
+  chatId,
+  message,
+}: {
+  chatId: string
+  message: string
+}): Promise<Message> => {
   const response = await baseClient.post(`/chats/${chatId}/messages`, {
     content: message,
   })
+  return response.data
+}
+
+export const getResponseForMessage = async ({
+  chatId,
+  messageId,
+}: {
+  chatId: string
+  messageId: string
+}): Promise<Message> => {
+  const response = await baseClient.get(`/chats/${chatId}/messages/${messageId}/response`)
   return response.data
 }

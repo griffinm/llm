@@ -1,7 +1,8 @@
-import { Box, Button, List, ListItem, ListItemText, TextField } from '@mui/material'
+import { CircularProgress, List, ListItem, ListItemText, TextField } from '@mui/material'
 import { useState, useEffect } from 'react'
-import { getMessagesForChat, sendMessage } from '../../utils/api'
+import { getMessagesForChat, getResponseForMessage, sendMessage } from '../../utils/api'
 import { Message } from '../../utils/types'
+import { MessageItem } from '../MessageItem'
 
 export function Chat({
   id,
@@ -10,31 +11,48 @@ export function Chat({
 }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState<string>('')
+  const [userMessageSending, setUserMessageSending] = useState<boolean>(false)
+  const [responseMessageLoading, setResponseMessageLoading] = useState<boolean>(false)
 
   useEffect(() => {
     getMessagesForChat(id).then(setMessages)
   }, [id])
+  const handleSend = async () => {
+    setInput('')
+    setResponseMessageLoading(true)
+    setUserMessageSending(true)
 
-  const handleSend = () => {
-    sendMessage(id, input).then((message) => { 
-      setMessages([...messages, message])
-      setInput('')
-    })
+    const userMessage = await sendMessage({ chatId: id, message: input })
+    setMessages([...messages, userMessage])
+    setUserMessageSending(false)
+
+    const responseMessage = await getResponseForMessage({ chatId: id, messageId: userMessage.id })
+    setMessages([...messages, userMessage, responseMessage])
+    setResponseMessageLoading(false)
+  }
+
+  const renderResponseLoading = () => {
+    if (responseMessageLoading) {
+      return (
+        <ListItem>
+          <CircularProgress />
+        </ListItem>
+      )
+    }
   }
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="flex flex-col w-full h-full">
-        <List>
-          {messages.map((message, index) => (
-            <ListItem key={index}>
-              <ListItemText primary={message.content} />
-            </ListItem>
+    <div className="flex flex-col px-10">
+      <div className="flex flex-col">
+        <div className="flex flex-col flex-1">
+          {messages.map((message) => (
+            <MessageItem key={message.id} message={message} />
           ))}
-        </List>
+          {renderResponseLoading()}
+        </div>
       </div>
 
-      <div className="flex flex-1 m-5">
+      <div className="flex flex-1 m-5 w-full">
         <TextField
           value={input}
           fullWidth
